@@ -42,12 +42,17 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// encrypte password before saving it
+// encrypte password before saving it -- HOOKS
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
   }
   this.password = await bcrypt.hash(this.password, 10);
 });
+
+// validate the password with password sent by the user
+userSchema.methods.isValidPassword = async function (passwordSentByUser) {
+  return await bcrypt.compare(passwordSentByUser, this.password);
+};
 
 module.exports = mongoose.model("User", userSchema);
