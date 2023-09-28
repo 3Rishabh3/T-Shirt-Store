@@ -3,6 +3,7 @@ const BigPromise = require("../middlewares/bigPromise");
 const CustomError = require("../utils/customErrors");
 const cookieToken = require("../utils/cookieToken");
 const cloudinary = require("cloudinary");
+const mailHelper = require("../utils/emailHelper");
 
 exports.signup = BigPromise(async (req, res, next) => {
   let result;
@@ -76,4 +77,44 @@ exports.logout = BigPromise(async (req, res, next) => {
     success: true,
     message: "Logout success",
   });
+});
+
+exports.forgotPassword = BigPromise(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  // if user not found in db
+  if (!user) {
+    return next(new CustomError("Email is not registered", 400));
+  }
+
+  const forgotToken = user.getForgotPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  const url = `${req.protocol}://${req.get(
+    "host"
+  )}/password/reset/${forgotToken}`;
+
+  const message = `Copy paste this link in your url and hit enter \n\n ${url}`;
+
+  try {
+    await mailHelper({
+      email: user.email,
+      subject: "TStore Password reset email",
+      message,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Email sent successfully",
+    });
+  } catch (error) {
+    user.forgotPasswordToken = undefined;
+    user.forgotPasswordExpiry = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(new CustomError(error.message, 500));
+  }
 });
