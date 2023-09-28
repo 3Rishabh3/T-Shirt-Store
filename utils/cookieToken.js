@@ -8,7 +8,7 @@ const cookieToken = (user, res) => {
     httpOnly: true,
   };
 
-  res.status(200).cookie("token", options).json({
+  res.status(200).cookie("token", token, options).json({
     success: true,
     token,
     user,
