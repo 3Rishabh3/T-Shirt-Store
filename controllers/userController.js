@@ -10,7 +10,7 @@ exports.signup = BigPromise(async (req, res, next) => {
 
   if (req.files) {
     let file = req.files.photo;
-    result = await cloudinary.v2.uploader.upload(file, {
+    result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
       folder: "users",
       width: 150,
       crop: "scale",
@@ -18,6 +18,10 @@ exports.signup = BigPromise(async (req, res, next) => {
   }
 
   const { name, email, password } = req.body;
+
+  if (email && (await User.findOne({ email }))) {
+    res.status(401).send("User already exists");
+  }
 
   if (!email || !name || !password) {
     return next(new CustomError("Name, email, password are required", 400));
