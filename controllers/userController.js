@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/user");
 const BigPromise = require("../middlewares/bigPromise");
 const CustomError = require("../utils/customErrors");
 const cookieToken = require("../utils/cookieToken");
@@ -150,4 +150,13 @@ exports.passwordReset = BigPromise(async (req, res, next) => {
 
   // send JSON response or token
   cookieToken(user, res);
+});
+
+exports.getLoggedInUserDetails = BigPromise(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
