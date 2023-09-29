@@ -284,3 +284,44 @@ exports.adminGetOneUser = BigPromise(async (req, res, next) => {
     user,
   });
 });
+
+exports.adminUpdateOneUserDetails = BigPromise(async (req, res, next) => {
+  console.log("function called");
+  const { name, email, role } = req.body;
+
+  const newData = {};
+
+  // if admin wants to change name of a user
+  if (name) {
+    newData.name = req.body.name;
+  }
+
+  // if admin wants to change email of a user
+  if (email) {
+    if (await User.findOne({ email })) {
+      return next(
+        new CustomError("email already exists, please use different email", 400)
+      );
+    }
+    newData.email = req.body.email;
+  }
+
+  // if admin wants to change role of a user
+  if (role) {
+    newData.role = req.body.role;
+  }
+
+  if (Object.keys(newData).length === 0) {
+    return next(new CustomError("no field has been provided to change.", 400));
+  }
+
+  await User.findByIdAndUpdate(req.params.id, newData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+  });
+});
