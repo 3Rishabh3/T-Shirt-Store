@@ -35,5 +35,6 @@ app.use("/api/v1", user);
 app.get("/signuptest", (req, res) => {
   res.render("signuptest");
 });
+
 // export app js
 module.exports = app;
