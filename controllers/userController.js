@@ -5,6 +5,7 @@ const cookieToken = require("../utils/cookieToken");
 const cloudinary = require("cloudinary");
 const mailHelper = require("../utils/emailHelper");
 const crypto = require("crypto");
+const user = require("../models/user");
 
 exports.signup = BigPromise(async (req, res, next) => {
   let result;
@@ -191,4 +192,71 @@ exports.changePassword = BigPromise(async (req, res, next) => {
   await user.save();
 
   cookieToken(user, res);
+});
+
+exports.updateUserDetails = BigPromise(async (req, res, next) => {
+  const { name, email } = req.body;
+
+  const newData = {};
+
+  // if user wants to change name
+  if (name) {
+    newData.name = req.body.name;
+  }
+
+  // if user wants to change email
+  if (email) {
+    if (await User.findOne({ email })) {
+      return next(
+        new CustomError("email already exists, please use different email", 400)
+      );
+    }
+    newData.email = req.body.email;
+  }
+
+  if (req.files && req.files.photo !== "") {
+    const user = await User.findById(req.user.id);
+
+    const imageId = user.photo.id;
+
+    // delete photo on cloudinary
+    await cloudinary.v2.uploader.destroy(imageId);
+
+    // update the new photo
+    const result = await cloudinary.v2.uploader.upload(
+      req.files.photo.tempFilePath,
+      {
+        folder: "users",
+        width: 150,
+        crop: "scale",
+      }
+    );
+
+    newData.photo = {
+      id: result.public_id,
+      secure_url: result.secure_url,
+    };
+  }
+
+  if (Object.keys(newData).length === 0) {
+    return next(new CustomError("no field has been provided to change.", 400));
+  }
+
+  await User.findByIdAndUpdate(req.user.id, newData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.adminAllUser = BigPromise(async (req, res, next) => {
+  const users = await User.find();
+  res.status(200).json({
+    success: true,
+    users,
+  });
 });
