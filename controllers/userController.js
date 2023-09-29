@@ -253,10 +253,34 @@ exports.updateUserDetails = BigPromise(async (req, res, next) => {
   });
 });
 
+// admin can access all the details of all the registered users
 exports.adminAllUser = BigPromise(async (req, res, next) => {
   const users = await User.find();
   res.status(200).json({
     success: true,
     users,
+  });
+});
+
+// manager can access only the users with role 'user'
+exports.managerAllUser = BigPromise(async (req, res, next) => {
+  const users = await User.find({ role: "user" });
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+exports.adminGetOneUser = BigPromise(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    next(new CustomError("no use found", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
   });
 });
