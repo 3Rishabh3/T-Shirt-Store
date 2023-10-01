@@ -57,15 +57,6 @@ exports.getProducts = BigPromise(async (req, res, next) => {
   });
 });
 
-exports.adminGetProducts = BigPromise(async (req, res, next) => {
-  const products = await Product.find();
-
-  res.status(200).json({
-    success: true,
-    products,
-  });
-});
-
 exports.getOneProduct = BigPromise(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
@@ -78,6 +69,97 @@ exports.getOneProduct = BigPromise(async (req, res, next) => {
   res.status(200).json({
     success: true,
     product,
+  });
+});
+
+exports.addProductReview = BigPromise(async (req, res, next) => {
+  const { comment, rating, productId } = req.body;
+  console.log(req.user);
+  const review = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+
+  let product = await Product.findById(productId);
+
+  const alreadyReview = product.reviews.find(
+    (review) => review.user.toString() === req.user._id.toString()
+  );
+
+  if (alreadyReview) {
+    product.reviews.forEach((review) => {
+      if (review.user.toString() === req.user._id.toString()) {
+        review.comment = comment;
+        review.rating = rating;
+      }
+    });
+  } else {
+    product.reviews.push(review);
+    product.numberOfReviews = product.reviews.length;
+  }
+
+  let ratingsSum = 0;
+  for (let i = 0; i < product.reviews.length; i++) {
+    ratingsSum = ratingsSum + product.reviews[i].rating;
+  }
+
+  product.ratings = ratingsSum / product.reviews.length;
+
+  await product.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.deleteProductReview = BigPromise(async (req, res, next) => {
+  const { productId } = req.query;
+
+  const product = await Product.findById(productId);
+
+  const reviews = product.reviews.filter(
+    (review) => review.user.toString() !== req.user._id.toString()
+  );
+
+  const numberOfReviews = reviews.length;
+
+  let ratingsSum = 0;
+  console.log(reviews);
+  console.log(reviews.length);
+  for (let i = 0; i < reviews.length; i++) {
+    ratingsSum = ratingsSum + reviews[i].rating;
+  }
+
+  const ratings = reviews.length ? ratingsSum / reviews.length : 0;
+
+  await Product.findByIdAndUpdate(
+    productId,
+    {
+      reviews,
+      ratings,
+      numberOfReviews,
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// admin only routes
+exports.adminGetProducts = BigPromise(async (req, res, next) => {
+  const products = await Product.find();
+
+  res.status(200).json({
+    success: true,
+    products,
   });
 });
 

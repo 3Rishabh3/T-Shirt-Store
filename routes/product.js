@@ -8,12 +8,16 @@ const {
   getOneProduct,
   adminUpdateOneProduct,
   adminDeleteOneProduct,
+  addProductReview,
+  deleteProductReview,
 } = require("../controllers/productController");
 const { isLoggedIn, customRole } = require("../middlewares/user");
 
 // user routes
 router.route("/products").get(getProducts);
 router.route("/product/:id").get(getOneProduct);
+router.route("/review").put(isLoggedIn, addProductReview);
+router.route("/review").delete(isLoggedIn, deleteProductReview);
 
 // admin routes
 router
