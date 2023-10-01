@@ -37,14 +37,14 @@ exports.addProduct = BigPromise(async (req, res, next) => {
 
 exports.getProducts = BigPromise(async (req, res, next) => {
   const resultPerPage = 6;
-  const countOfAllProducts = await Product.countDocuments();
+  const totalCountOfAllTheProductsInStore = await Product.countDocuments();
 
   const productsObj = new WhereClause(Product.find(), req.query)
     .search()
     .filter();
 
   let products = await productsObj.base;
-  const countOfAllFilteredproducts = products.length;
+  const countOfAllFilteredProducts = products.length;
 
   productsObj.pager(resultPerPage);
   products = await productsObj.base.clone();
@@ -52,7 +52,7 @@ exports.getProducts = BigPromise(async (req, res, next) => {
   res.status(200).json({
     success: true,
     products,
-    countOfAllFilteredproducts,
-    countOfAllProducts,
+    countOfAllFilteredProducts,
+    totalCountOfAllTheProductsInStore,
   });
 });

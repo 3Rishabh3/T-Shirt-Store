@@ -1,8 +1,6 @@
 // base - Product.find()
 // base - Product.find(category: {"hoodies"})
 
-const { json } = require("express");
-
 //query - search=coder&page=2&category=shortsleeves&rating[gte]=4&price[lte]=999&price[gte]=199&limit=5
 //this query is url, but req.query is an object
 
@@ -49,7 +47,10 @@ class WhereClause {
 
     // replace gte with $gte and lte with $lte
     const regex = /\b(gte|lte)\b/g;
-    stringOfCopyOfQuery.replace(regex, (match) => `$${match}`);
+    stringOfCopyOfQuery = stringOfCopyOfQuery.replace(
+      regex,
+      (match) => `$${match}`
+    );
 
     // again convert string after modifying to an object
     const jsonObjectForDB = JSON.parse(stringOfCopyOfQuery);
