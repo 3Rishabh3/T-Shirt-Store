@@ -20,7 +20,16 @@ class WhereClause {
         }
       : {};
 
-    this.base = this.base.find({ ...searchword });
+    this.base = this.base.find({ ...searchword }); // Product.find().find({searchword})
+    return this;
+  }
+
+  pager(resultperpage) {
+    const currentPage = this.query.page ? this.query.page : 1;
+
+    const skipValue = resultperpage * (currentPage - 1);
+
+    this.base = this.base.limit(resultperpage).skip(skipValue); // Product.find().limit(resultperpage).skip(skipValue)
     return this;
   }
 }
