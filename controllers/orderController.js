@@ -39,6 +39,10 @@ exports.getOneOrder = BigPromise(async (req, res, next) => {
     return next(new CustomError("Please check order id", 401));
   }
 
+  if (order.user.email !== req.user.email) {
+    return next(new CustomError("This order is not associated to you.", 400));
+  }
+
   res.status(200).json({
     success: true,
     order,
