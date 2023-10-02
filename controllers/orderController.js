@@ -61,3 +61,11 @@ exports.getLoggedInUserOrder = BigPromise(async (req, res, next) => {
     order,
   });
 });
+
+exports.adminGetAllOrders = BigPromise(async (req, res, next) => {
+  const orders = await Order.find();
+  res.status(200).json({
+    success: true,
+    orders,
+  });
+});
