@@ -72,7 +72,10 @@ exports.adminGetAllOrders = BigPromise(async (req, res, next) => {
 
 exports.adminUpdateOrder = BigPromise(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
-  console.log(order);
+  if (!order) {
+    return next(new CustomError("order not found", 401));
+  }
+
   const enums = [
     "awaitingPayment",
     "failed",
@@ -108,6 +111,17 @@ exports.adminUpdateOrder = BigPromise(async (req, res, next) => {
     );
   });
   await order.save();
+
+  res.status(200).json({
+    success: true,
+    order,
+  });
+});
+
+exports.adminDeleteOrder = BigPromise(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+
+  await order.deleteOne();
 
   res.status(200).json({
     success: true,
