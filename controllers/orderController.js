@@ -69,3 +69,62 @@ exports.adminGetAllOrders = BigPromise(async (req, res, next) => {
     orders,
   });
 });
+
+exports.adminUpdateOrder = BigPromise(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+  console.log(order);
+  const enums = [
+    "awaitingPayment",
+    "failed",
+    "expired",
+    "paymentRecieved",
+    "inTransist",
+    "cancelled",
+    "delivered",
+    "returnInProgress",
+    "returnCompleted",
+    "refundInProgress",
+    "refundedCompleted",
+  ];
+  if (
+    order.orderStatus === enums[1] || // failed
+    order.orderStatus === enums[2] || // expired
+    order.orderStatus === enums[10] // refundedCompleted
+  ) {
+    return next(
+      new CustomError(`Order is already marked for ${order.orderStatus}`),
+      401
+    );
+  }
+
+  order.orderStatus = req.body.orderStatus;
+
+  order.orderItems.forEach(async (product) => {
+    await updateProductStock(
+      product.product,
+      product.quantity,
+      order.orderStatus,
+      enums
+    );
+  });
+  await order.save();
+
+  res.status(200).json({
+    success: true,
+    order,
+  });
+});
+
+async function updateProductStock(productId, quantity, orderStatus, enums) {
+  const product = await Product.findById(productId);
+
+  if (orderStatus === enums[3]) {
+    // payment recieved
+    product.stock = product.stock - quantity;
+  }
+  if (orderStatus === enums[8]) {
+    // return complete
+    product.stock = product.stock + quantity;
+  }
+  await product.save({ validateBeforeSave: false });
+}
