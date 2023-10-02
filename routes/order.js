@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const {} = require("../controllers/orderController");
+const { createOrder } = require("../controllers/orderController");
+const { isLoggedIn, customRole } = require("../middlewares/user");
 
-// router.route("/").get(home);
+router.route("/order/create").post(isLoggedIn, createOrder);
 
 module.exports = router;

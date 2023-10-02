@@ -1,0 +1,26 @@
+{
+    "shippingInfo": {
+      "address": "1 Shivpuri",
+      "city": "Shivpuri",
+      "phoneNo": "9898989898",
+      "postalCode": "302020",
+      "state": "Madhya Pradesh",
+      "country": "India"
+    },
+    "orderItems": [
+      {
+        "name": "Classic Coder T-shirt",
+        "quantity": 1,
+        "image": "https://res.cloudinary.com/dttsnqkje/image/upload/v1696193931/products/czpzbftakvcbhpvxhnwu.jpg",
+        "price": 599,
+        "product": "6519ab64d10cde547ab356e4"
+      }
+    ],
+    "paymentInfo": {
+      "id": "testString"
+    },
+    "taxAmount": 40,
+    "shippingAmount": 10,
+    "totalAmount": 100
+  }
+  
