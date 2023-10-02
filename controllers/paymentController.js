@@ -1,5 +1,6 @@
 const BigPromise = require("../middlewares/bigPromise");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const Razorpay = require("razorpay");
 
 exports.sendStripeKey = BigPromise(async (req, res, next) => {
   res.status(200).json({
