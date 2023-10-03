@@ -1,11 +1,11 @@
 openapi: "3.0.0"
 info:
   title: Tshirt store API
-  description: API for ecomm store
+  description: API for T-shirt store
   version: 1.1.0
   contact:
     email: 3rishabh3@gmail.com
-    url: "https://rishabh.dev"
+    url: "https://rishabhgupta.netlify.app/"
 
 # servers:
 #   - url: "https://localhost:4000/api/v1"
@@ -25,7 +25,7 @@ servers:
       url:
         enum:
           - localhost:4000
-          - tshirtstore.herokuapp.com
+          - tshirtstore-49sm.onrender.com
         default: localhost:4000
       protocol:
         enum:
